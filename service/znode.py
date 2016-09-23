@@ -142,7 +142,15 @@ def get_znode_tree(zoo_client, path, nodes, current_id='1', parent_id='0'):
             idx = '{0:02d}'.format(idx)
             # parent_id as 1, then child_id should be 10, 11, 12...
             child_id = "{0}{1}".format(current_id, idx)
-            child_path = os.path.join(path, child)
+            child_path = path+child if path == "/" else path+"/"+child  # os.path.join(path, child)
+            # child node edit
+            # child_name = child_path if child_path == "/" else child_path.rsplit('/', 1)[-1]
+            # nodes.append({
+            #     "id": child_id,
+            #     "pId": current_id,
+            #     "name": child_name,
+            #     "path": child_path
+            #     })
             get_znode_tree(zoo_client, child_path, nodes, child_id, current_id)
 
 

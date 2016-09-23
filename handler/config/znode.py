@@ -216,6 +216,59 @@ class ZdZnodeEditTreeHandler(CommonBaseHandler):
                            parent_path=self.path,
                            child_znodes=child_znodes)
 
+@route(r'/config/znode/batchimport', '批量导入')
+class ZdZnodeEditTreeHandler(CommonBaseHandler):
+
+    """batch edit, 批量修改
+    """
+    args_list = [
+        ArgsMap('path', required=True),
+        ArgsMap('cluster_name', required=True),
+    ]
+
+    @authenticated
+    def response(self):
+        '''batch edit
+        '''
+        return self.render('config/znode/batchimport.html',
+                           action='/config/znode/fileimport',
+                           cluster_name=self.cluster_name,
+                           parent_path=self.path,
+                           child_znodes=[])
+
+@route(r'/config/znode/fileimport')
+class ZdZnodeBatchSaveHandler(CommonBaseHandler):
+    """fileimport
+    """
+    args_list = [
+        ArgsMap('cluster_name', required=True),
+        ArgsMap('parent_path', required='/'),
+        ArgsMap('uploadfile', required=True),
+    ]
+
+    @authenticated
+    def response(self):
+        '''fileimport
+        '''
+        filecontent = ''
+        if 'uploadfile' not in self.request.files:
+            return self.ajax_popup(code=300, msg="请选择上传文件！")
+        upload_file = self.request.files['uploadfile'][0]
+        filecontent = upload_file['body']
+        child_znodes=[]
+        keyvalue=[]
+        for line in filecontent.splitlines():
+            keyvalue = line.split(str='=',num=2)
+            node = {"path": keyvalue[0], "value": keyvalue[1]}
+            node["name"] = os.path.join(parent_path,keyvalue[0])
+            child_znodes.append(node)
+        return self.render('config/znode/batchimport.html',
+                   action='/config/znode/batchsave',
+                   cluster_name=self.cluster_name,
+                   parent_path=self.path,
+                   uploadfile=uploadfile,
+                   child_znodes=child_znodes)
+
 
 @route(r'/config/znode/syncstatus')
 class ZdZnodeSyncstatusHandler(CommonBaseHandler):
