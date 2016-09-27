@@ -254,14 +254,15 @@ class ZdZnodeBatchImportHandler(CommonBaseHandler):
         '''
         child_znodes=[]
         keyvalue=[]
-        for line in open(self.uploadfile,'r'):
+        log.info(len(self.request.files))
+        log.info(self.uploadfile)
+        for line in self.uploadfile.splitlines():
             if line.strip() and not line.startswith('#'):
                 keyvalue = line.split('=',1)
                 log.info(keyvalue)
                 node = {"name": keyvalue[0], "value": keyvalue[1]}
                 node["path"] = os.path.join(self.parent_path,keyvalue[0])
                 child_znodes.append(node)
-        # log.info(json.dumps(child_znodes))
         return json.dumps(child_znodes)
 
 

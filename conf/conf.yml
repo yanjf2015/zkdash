@@ -24,7 +24,7 @@ LOG_ITEMS:
     backup_count: 10
     backup_suffix: '%Y%m%d'
     level: 'DEBUG'
-  - file: d:/logs/zkdash/zkdash.error.log
+  - file: zkdash/logs/zkdash.error.log
     log_levels:
       - WARNING
       - ERROR

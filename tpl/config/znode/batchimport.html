@@ -6,14 +6,14 @@
    <div class="form-group">
     <label class="col-md-4 control-label">当前集群名称:</label>
     <div class="col-md-8">
-      <input class="form-control" type="text" id="cluster_name" value="{{ cluster_name }}" size="25" readonly>
+      <input class="form-control" type="text" name="cluster_name" id="cluster_name" value="{{ cluster_name }}" size="25" readonly>
     </div>
    </div>
 
    <div class="form-group">
     <label class="col-md-4 control-label">父节点路径:</label>
     <div class="col-md-8">
-      <input class="form-control" type="text" id="parent_path" value="{{ parent_path }}" size="25" readonly>
+      <input class="form-control" type="text" name="parent_path" id="parent_path" value="{{ parent_path }}" size="25" readonly>
     </div>
    </div>
 
@@ -67,14 +67,19 @@ function deleteTreeNode(target){
   $(target).addClass("row-del");
 }
 $('#uploadfile').live('change',function(){ 
-  var path = $('#parent_path').val();
-  var cluster_name = $("#cluster_name").val();
-  var uploadfile = $("#uploadfile").val();
-  if (uploadfile && uploadfile.trim().length > 0) {
-    var req_url = 'config/znode/fileimport?parent_path=' + path + '&cluster_name=' + cluster_name + '&uploadfile=' + uploadfile;
-    // $(this).bjuiajax('ajaxload', {url:req_url, confirmMsg:"确认?????吗？", target:"znode_tree_table"});
+  var reader = new FileReader();
+  var uploadfile = $("#uploadfile")[0].files[0];
+  reader.readAsText(uploadfile, 'utf-8');
+  reader.onload = function(e) {
+    var req_url = 'config/znode/fileimport';
     $.ajax({
+      contentType:'application/json',
       url:req_url,
+      data:{
+            parent_path:$('#parent_path').val(),
+            cluster_name:$("#cluster_name").val(),
+            uploadfile:reader.result
+            },
       error: function(){
             table1 = "<li>&nbsp;<span style='color: red'>暂无数据,查询失败</span></li>";
             $('#znode_tree_tbody').html(table1);
@@ -103,9 +108,7 @@ $('#uploadfile').live('change',function(){
             }
             $('#znode_tree_tbody').html(table1);
         }
-    });
-  } else {
-    $(this).alertmsg('error', '请指定节点路径！');
+    });   
   }
 });
 </script>
