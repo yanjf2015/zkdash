@@ -254,8 +254,6 @@ class ZdZnodeBatchImportHandler(CommonBaseHandler):
         '''
         child_znodes=[]
         keyvalue=[]
-        log.info(len(self.request.files))
-        log.info(self.uploadfile)
         for line in self.uploadfile.splitlines():
             if line.strip() and not line.startswith('#'):
                 keyvalue = line.split('=',1)
