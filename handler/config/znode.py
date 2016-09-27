@@ -26,6 +26,7 @@ from model.db.zd_qconf_feedback import ZdQconfFeedback
 from service import zookeeper as ZookeeperService
 from service import znode as ZnodeService
 from conf.settings import USE_QCONF
+from conf import log
 
 
 ############################################################
@@ -231,13 +232,14 @@ class ZdZnodeEditTreeHandler(CommonBaseHandler):
         '''batch edit
         '''
         return self.render('config/znode/batchimport.html',
-                           action='/config/znode/fileimport',
+                           action='/config/znode/batchsave',
                            cluster_name=self.cluster_name,
                            parent_path=self.path,
+                           uploadfile='',
                            child_znodes=[])
 
 @route(r'/config/znode/fileimport')
-class ZdZnodeBatchSaveHandler(CommonBaseHandler):
+class ZdZnodeBatchImportHandler(CommonBaseHandler):
     """fileimport
     """
     args_list = [
@@ -250,24 +252,17 @@ class ZdZnodeBatchSaveHandler(CommonBaseHandler):
     def response(self):
         '''fileimport
         '''
-        filecontent = ''
-        if 'uploadfile' not in self.request.files:
-            return self.ajax_popup(code=300, msg="请选择上传文件！")
-        upload_file = self.request.files['uploadfile'][0]
-        filecontent = upload_file['body']
         child_znodes=[]
         keyvalue=[]
-        for line in filecontent.splitlines():
-            keyvalue = line.split(str='=',num=2)
-            node = {"path": keyvalue[0], "value": keyvalue[1]}
-            node["name"] = os.path.join(parent_path,keyvalue[0])
-            child_znodes.append(node)
-        return self.render('config/znode/batchimport.html',
-                   action='/config/znode/batchsave',
-                   cluster_name=self.cluster_name,
-                   parent_path=self.path,
-                   uploadfile=uploadfile,
-                   child_znodes=child_znodes)
+        for line in open(self.uploadfile,'r'):
+            if line.strip() and not line.startswith('#'):
+                keyvalue = line.split('=',1)
+                log.info(keyvalue)
+                node = {"name": keyvalue[0], "value": keyvalue[1]}
+                node["path"] = os.path.join(self.parent_path,keyvalue[0])
+                child_znodes.append(node)
+        # log.info(json.dumps(child_znodes))
+        return json.dumps(child_znodes)
 
 
 @route(r'/config/znode/syncstatus')

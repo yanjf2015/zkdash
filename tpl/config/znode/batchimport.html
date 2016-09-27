@@ -6,24 +6,23 @@
    <div class="form-group">
     <label class="col-md-4 control-label">当前集群名称:</label>
     <div class="col-md-8">
-      <input class="form-control" type="text" name="cluster_name" value="{{ cluster_name }}" size="25" readonly>
+      <input class="form-control" type="text" id="cluster_name" value="{{ cluster_name }}" size="25" readonly>
     </div>
    </div>
 
    <div class="form-group">
     <label class="col-md-4 control-label">父节点路径:</label>
     <div class="col-md-8">
-      <input class="form-control" type="text" name="parent_path" value="{{ parent_path }}" size="25" readonly>
+      <input class="form-control" type="text" id="parent_path" value="{{ parent_path }}" size="25" readonly>
     </div>
    </div>
 
    <div class="form-group">
      <label class="col-md-4 control-label">选择文件:</label>
      <div class="col-md-4">
-      <input type="file" name="uploadfile"> <button type="button" class="btn btn-green" id="fileimport">读入</button>
+      <input type="file" id="uploadfile"> 
      </div>
    </div>
-
    <div class="form-group">
      <fieldset>
         <table id="znode_tree_table" class="table table-bordered table-hover table-top" data-toggle="tabledit" data-initnum="0">
@@ -43,7 +42,7 @@
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id='znode_tree_tbody'>
             {% for znode in child_znodes %}
             <tr>
               <td></td>
@@ -67,15 +66,46 @@
 function deleteTreeNode(target){
   $(target).addClass("row-del");
 }
-$('#fileimport').on('click', function(event){
-  var path = $('#zk_node_path').val();
-  var cluster_name = $("#zk_node_cluster").val();
-  var uploadfile = $('#uploadfile').val();
-  if (path && path.trim().length > 0) {
+$('#uploadfile').live('change',function(){ 
+  var path = $('#parent_path').val();
+  var cluster_name = $("#cluster_name").val();
+  var uploadfile = $("#uploadfile").val();
+  if (uploadfile && uploadfile.trim().length > 0) {
     var req_url = 'config/znode/fileimport?parent_path=' + path + '&cluster_name=' + cluster_name + '&uploadfile=' + uploadfile;
-    $(this).dialog({url:req_url, title: '文件导入', width: 600, height: 400});
+    // $(this).bjuiajax('ajaxload', {url:req_url, confirmMsg:"确认?????吗？", target:"znode_tree_table"});
+    $.ajax({
+      url:req_url,
+      error: function(){
+            table1 = "<li>&nbsp;<span style='color: red'>暂无数据,查询失败</span></li>";
+            $('#znode_tree_tbody').html(table1);
+      },
+      success: function(result){
+            var table1 = "";
+            if(result == 0){
+                table1 = "<li>&nbsp;<span style='color: red'>暂无数据,查询失败</span></li>";
+            } else {
+                var dataObj = eval("("+result+")");   //转换为json对象
+                for(var i = 0; i < dataObj.length; i++){
+                    table1 += '<tr class="readonly">'
+                              + '<td><input name="level" type="text" class="no form-control" value="' + i + '" size="5" readonly="">'
+                              + '<span class="input-hold" style="display:block; padding:0 4px; height:0px; font-size:12px; visibility:hidden;"></span></td>'
+                              + '<td data-val="' + dataObj[i].name + '">' 
+                              + '<input name="key" type="text" value="' + dataObj[i].name + '" class="form-control">'
+                              + '<span class="input-hold" style="display:block; padding:0 4px; height:0px; font-size:12px; visibility:hidden;"></span></td>'
+                              + '<td data-val="'+ dataObj[i].value + '">'
+                              + '<input name="value" type="text" value="' + dataObj[i].value + '" class="form-control">'
+                              + '<span class="input-hold" style="display:block; padding:0 4px; height:0px; font-size:12px; visibility:hidden;"></span></td>'
+                              + '<td data-val="' + dataObj[i].path + '">'
+                              + '<a href="#" onclick="deleteTreeNode(this)" class="btn btn-red" value="' + dataObj[i].path + '">删除</a>'
+                              + '<span class="input-hold" style="display:block; padding:0 4px; height:0px; font-size:12px; visibility:hidden;"></span></td>'
+                              + '</tr>';
+                }
+            }
+            $('#znode_tree_tbody').html(table1);
+        }
+    });
   } else {
-    $(this).alertmsg('error', '请选择文件！');
+    $(this).alertmsg('error', '请指定节点路径！');
   }
 });
 </script>
