@@ -217,8 +217,10 @@ class ZdZnodeEditTreeHandler(CommonBaseHandler):
                            parent_path=self.path,
                            child_znodes=child_znodes)
 
+##### add batch import start
+
 @route(r'/config/znode/batchimport', '批量导入')
-class ZdZnodeEditTreeHandler(CommonBaseHandler):
+class ZdZnodeImportTreeHandler(CommonBaseHandler):
 
     """batch edit, 批量修改
     """
@@ -232,7 +234,7 @@ class ZdZnodeEditTreeHandler(CommonBaseHandler):
         '''batch edit
         '''
         return self.render('config/znode/batchimport.html',
-                           action='/config/znode/batchsave',
+                           action='/config/znode/importsave',
                            cluster_name=self.cluster_name,
                            parent_path=self.path,
                            uploadfile='',
@@ -257,12 +259,51 @@ class ZdZnodeBatchImportHandler(CommonBaseHandler):
         for line in self.uploadfile.splitlines():
             if line.strip() and not line.startswith('#'):
                 keyvalue = line.split('=',1)
-                log.info(keyvalue)
                 node = {"name": keyvalue[0], "value": keyvalue[1]}
                 node["path"] = os.path.join(self.parent_path,keyvalue[0])
                 child_znodes.append(node)
         return json.dumps(child_znodes)
 
+@route(r'/config/znode/importsave')
+class ZdZnodeImportSaveHandler(CommonBaseHandler):
+    """save
+    """
+    args_list = [
+        ArgsMap('cluster_name', required=True),
+        ArgsMap('parent_path', required='/'),
+        ArgsMap('business', default=''),
+        ArgsMap('deleted', default=''),
+    ]
+
+    @authenticated
+    def response(self):
+        '''save
+        '''
+        keys = self.get_arguments("key")
+        values = self.get_arguments("value")
+
+        batch_data = []
+        for node_name, node_value in zip(keys, values):
+            # 过滤掉所有key为空字符串的项
+            if node_name == '':
+                continue
+            # 检验node_name中是否包含`/`特殊字符
+            if not ZnodeService.is_node_name_ok(node_name):
+                return self.ajax_popup(code=300, msg="节点名不允许包含特殊字符'/'！")
+            batch_data.append((node_name, node_value))
+
+        # 更新字典，需要删除旧字典与新字典的差集项
+        # ZnodeService.delete_znodes_diff_with_keys(
+        #     self.cluster_name, self.parent_path, keys)
+        # 更新在zookeeper和mysql上存储的配置信息, 同时进行快照备份
+        ZnodeService.set_batch_znodes(cluster_name=self.cluster_name,
+                                      parent_path=self.parent_path,
+                                      batch_data=batch_data,
+                                      business=self.business)
+
+        return self.ajax_ok(close_current=True)
+
+###### add batch import end
 
 @route(r'/config/znode/syncstatus')
 class ZdZnodeSyncstatusHandler(CommonBaseHandler):
