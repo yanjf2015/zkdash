@@ -97,6 +97,7 @@
 <!-- init -->
 <script type="text/javascript">
 $(function() {
+    alert($.cookie('name'));
     BJUI.init({
         JSPATH       : '../../static/BJUI/',         //[可选]框架路径
         PLUGINPATH   : '../../static/BJUI/plugins/', //[可选]插件路径
@@ -204,6 +205,36 @@ function MainMenuClick(event, treeId, treeNode) {
                 </ul>
             </div>
             <button type="button" class="btn-default bjui-hnav-more-right" title="导航菜单右移"><i class="fa fa-angle-double-right"></i></button>
+        </div>
+        <div style="text-align:right;float: right">
+                <div style="margin-right:20px;margin-top:20px;padding:0 auto;vertical-align: middle">
+                    <img alt="user" src="../static/images/user_male_2.png" style="vertical-align: middle"/>
+                    <span style="line-height:26px;vertical-align:middle;display:inline-block">欢迎您！</span>
+                    <span id="span_admin" style="line-height:26px;vertical-align:middle;display:inline-block">[$.cookie('name')]</span>
+                    <a id="change-theme-menubutton" href="javascript:void(0)">更换主题</a>
+                    <a id="exit-menubutton" href="javascript:void(0)">退出系统</a>
+                </div>
+                <div id="theme-menu" style="width: 150px;">
+                    <div data-options="iconCls:''">Default</div>
+                    <div data-options="iconCls:''">Gray</div>
+                    <div data-options="iconCls:''">Bootstrap</div>
+                    <div data-options="iconCls:''">Black</div>
+                    <div data-options="iconCls:''">Metro</div>
+                    <div class="menu-sep"></div>
+                    <div data-options="iconCls:''">Metro-Blue</div>
+                    <div data-options="iconCls:''">Metro-Gray</div>
+                    <div data-options="iconCls:''">Metro-Green</div>
+                    <div data-options="iconCls:''">Metro-Orange</div>
+                    <div data-options="iconCls:''">Metro-Red</div>
+                    <div class="menu-sep"></div>
+                    <div data-options="iconCls:''">UI-Cupertino</div>
+                    <div data-options="iconCls:''">UI-Pepper-Grinder</div>
+                    <div data-options="iconCls:''">UI-Sunny</div>
+                </div>
+                <div id="system-menu" style="width: 120px;">
+                    <div data-options="iconCls:'icon-custom-lock-go'" name="logout-button">注销登陆</div>
+                    <div data-options="iconCls:'icon-custom-exit'" name="exit-button">关闭系统</div>
+                </div>
         </div>
     </header>
     <div id="bjui-container">
