@@ -97,6 +97,7 @@
 </div>
 <script>
 function zkNodeClick(event, treeId, treeNode){
+    alert(JSON.stringify(treeNode));
     if (treeNode.path) {
       $('#zk_node_path').val(treeNode.path)
     } else {
@@ -117,6 +118,21 @@ function zkNodeClick(event, treeId, treeNode){
     } else {
       $('#zk_node_business').val('')
     }
+    cluster_name = $("#config_searcher select[name='cluster_name']").val();
+    alert(treeNode.pId);
+    $.post(
+        "/config/znode/znodechild",
+        {cluster_name: cluster_name, path: treeNode.path, pid: treeNode.pId, _xsrf: $.cookie('_xsrf')},
+        function(data){
+          // 确认是否有注册Agent的数据
+          if (data.statusCode && data.statusCode === 300) {
+            $(this).alertmsg('warn', '');
+          } else {
+            alert(data);
+              event.bindTree()
+          }
+        }
+    );
 };
 
 $('#add_znode').on('click', function(event){

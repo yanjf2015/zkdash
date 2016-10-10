@@ -35,3 +35,9 @@ LOG_ITEMS:
     backup_count: 30
     backup_suffix: '%Y%m%d'
     level: 'DEBUG'
+
+PASSPORT:
+  internalUrl: http://passport.msxf.louat/
+  publicUrl: http://passport.msxf.louat/
+  projectCode: message_boss
+  projectKey: s6ugypfj

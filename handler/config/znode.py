@@ -50,6 +50,47 @@ class ZdZnodeIndexHandler(CommonBaseHandler):
         return self.render('config/znode/index.html',
                            clusters=clusters)
 
+@route('/config/znode/znodechild')
+class ZdZnodeChildHandler(CommonBaseHandler):
+    """tree
+    """
+    args_list = [
+        ArgsMap('cluster_name', required=True),
+        ArgsMap('path', default="/"),
+        ArgsMap('pid', default=0),
+    ]
+
+    @authenticated
+    def response(self):
+        """返回指定zookeeper集群的znode信息, 响应ajax请求
+        """
+        nodes = []
+        normalized_path = normalize_path(self.path)
+
+        if USE_QCONF:
+            ZnodeService.get_znode_tree_from_qconf(
+                self.cluster_name, normalized_path, nodes)
+        else:
+            zoo_client = ZookeeperService.get_zoo_client(self.cluster_name)
+            if not zoo_client:
+                return self.ajax_popup(code=300, msg="连接zookeeper出错！")
+            ZnodeService.get_znode_tree(zoo_client, normalized_path, nodes, current_id=self.pid+1, parent_id=self.pid)
+
+        if normalized_path != "/" and len(nodes) <= 1:
+            return self.ajax_popup(
+                code=300, msg="对不起，该节点路径下（%s）无数据！" % self.path)
+
+        for node in nodes:
+            zk_node = ZdZnode.one(
+                path=node["path"],
+                cluster_name=self.cluster_name)
+            if zk_node:
+                node['type'] = zk_node.type
+                node['business'] = zk_node.business
+                node['data'] = ZookeeperService.get(
+                    self.cluster_name, node["path"])
+        znodes_data = json.dumps(nodes)
+        return znodes_data
 
 @route('/config/znode/displaytree')
 class ZdZnodeShowHandler(CommonBaseHandler):

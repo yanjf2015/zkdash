@@ -18,6 +18,10 @@ from tornado.web import RequestHandler
 from lib.utils import toint, tofloat
 from lib.utils import log_format
 from conf import log
+from urllib import quote
+from urllib2 import urlopen
+
+from conf.settings import PASSPORT
 
 
 class ArgsMap(object):
@@ -59,10 +63,14 @@ class BaseHandler(RequestHandler):
     def get_current_user(self):
         '''获取当前用户
         '''
-        if not self.get_secure_cookie('token') or not self.get_cookie('name'):
+        if not self.get_secure_cookie('token'):
             return None
-        else:
-            return self.get_cookie('name')
+        elif not self.get_secure_cookie('name'):
+            url = PASSPORT['internalUrl'] + '/api/findAdminByToken?token=' + quote(self.token) + '&projectKey=' + quote(PASSPORT['projectKey'])
+            resp = json.load(urlopen(url))
+            self.set_secure_cookie('email', (resp['email']).encode('utf-8'))
+            self.set_secure_cookie('name', (resp['name']).encode('utf-8'))
+        return self.get_secure_cookie('name')
         # return "tokyo"
 
     def prepare(self):
