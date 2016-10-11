@@ -33,7 +33,7 @@ class IndexHandler(CommonBaseHandler):
             url = PASSPORT['publicUrl'] + 'auth/validate?projectCode=' + quote(PASSPORT['projectCode']) + '&projectServer=' + quote(request.protocol + '://' +request.host) + '&fromPath=' + quote(request.path)
             return self.redirect(url.encode('utf-8'))
         return self.render('index.html',
-                           current_user=self.current_user)
+                           current_user=unquote(self.current_user))
 
 @route(r'/passport/authToken')
 class PassPortHandler(CommonBaseHandler):

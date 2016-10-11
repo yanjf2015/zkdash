@@ -1,5 +1,6 @@
 <div class="row" style="padding: 0 8px; margin-top: 8px;">
   <div class="col-md-6">
+    <input id="znodes" type="hidden" value="{{znodes_data}}">
     <div class="panel panel-default">
       <div class="panel-heading">节点展示</div>
       <div class="panel-body" style="height:470px; overflow:auto">
@@ -97,7 +98,6 @@
 </div>
 <script>
 function zkNodeClick(event, treeId, treeNode){
-    alert(JSON.stringify(treeNode));
     if (treeNode.path) {
       $('#zk_node_path').val(treeNode.path)
     } else {
@@ -118,21 +118,25 @@ function zkNodeClick(event, treeId, treeNode){
     } else {
       $('#zk_node_business').val('')
     }
-    cluster_name = $("#config_searcher select[name='cluster_name']").val();
-    alert(treeNode.pId);
+/*    cluster_name = $("#config_searcher select[name='cluster_name']").val();
+    pid = treeNode.pId==null?0:treeNode.pId;
+    var treeObj = $.fn.zTree.getZTreeObj(treeId);
     $.post(
         "/config/znode/znodechild",
-        {cluster_name: cluster_name, path: treeNode.path, pid: treeNode.pId, _xsrf: $.cookie('_xsrf')},
+        {cluster_name: cluster_name, path: treeNode.path, pid: pid, _xsrf: $.cookie('_xsrf')},
         function(data){
           // 确认是否有注册Agent的数据
           if (data.statusCode && data.statusCode === 300) {
             $(this).alertmsg('warn', '');
           } else {
-            alert(data);
-              event.bindTree()
+              znodes_data = $('#znodes').val().substr(0,$('#znodes').val().length-1) + ',' + data.substr(1);
+              alert(data);
+//              treeNode.isParent=true;
+//              treeNode
+              treeObj.reAsyncChildNodes(data, "refresh");
           }
         }
-    );
+    );*/
 };
 
 $('#add_znode').on('click', function(event){
